@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dataset.js Demo</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script type="module">
+        import { Dataset } from '/Dataset.js';
+        import { faker } from 'https://cdn.jsdelivr.net/npm/@faker-js/faker/+esm';
+
+        window.faker = faker; // ensure faker is available for Dataset
+
+        const ds = new Dataset();
+
+        async function init() {
+            await ds.loadData();
+
+            // Map of function names to their argument requirements
+            const funcs = [
+                { name: 'gram' },
+                { name: 'brand' },
+                { name: 'product' },
+                { name: 'full_product' },
+                { name: 'company' },
+                { name: 'company_sector' },
+                { name: 'company_subsector' },
+                { name: 'food' },
+                { name: 'full_company' },
+                { name: 'prefix' },
+                { name: 'suffix' },
+                { name: 'company_suffix_prefix' },
+                { name: 'company_suffix_prefix_from_name', arg: true },
+                { name: 'get_company_code', arg: true }
+            ];
+
+            for (const fn of funcs) {
+                const row = document.getElementById('row-' + fn.name);
+                const btn = row.querySelector('button');
+                const out = row.querySelector('.output');
+                if (fn.arg) {
+                    const inp = row.querySelector('input');
+                    btn.onclick = () => {
+                        out.textContent = ds[fn.name](inp.value);
+                    };
+                } else {
+                    btn.onclick = () => {
+                        out.textContent = ds[fn.name]();
+                    };
+                }
+            }
+
+            // Generate All button logic
+            const btnAll = document.getElementById('btn-generate-all');
+            btnAll.onclick = () => {
+                // Generate all outputs
+                const values = {};
+                for (const fn of funcs) {
+                    if (!fn.arg) {
+                        values[fn.name] = ds[fn.name]();
+                    }
+                }
+                // Set all outputs for no-arg functions
+                for (const fn of funcs) {
+                    if (!fn.arg) {
+                        const row = document.getElementById('row-' + fn.name);
+                        const out = row.querySelector('.output');
+                        out.textContent = values[fn.name];
+                    }
+                }
+                // For company_suffix_prefix_from_name and get_company_code, use full_company as input
+                const fullCompany = values['full_company'];
+                // company_suffix_prefix_from_name
+                {
+                    const row = document.getElementById('row-company_suffix_prefix_from_name');
+                    const inp = row.querySelector('input');
+                    const out = row.querySelector('.output');
+                    inp.value = fullCompany;
+                    out.textContent = ds.company_suffix_prefix_from_name(fullCompany);
+                }
+                // get_company_code
+                {
+                    const row = document.getElementById('row-get_company_code');
+                    const inp = row.querySelector('input');
+                    const out = row.querySelector('.output');
+                    inp.value = fullCompany;
+                    out.textContent = ds.get_company_code(fullCompany);
+                }
+            };
+        }
+
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+    <style>
+        /* Remove most custom styles, keep only what is needed */
+        body { margin: 2em; }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container">
+        <h1 class="mb-4">Dataset Demo</h1>
+        <p>Download</p>
+        <ul>
+            <li><a href="/Dataset.js" target="_blank">Dataset.js</a></li>
+            <li><a href="/Dataset.php" target="_blank">Dataset.php</a></li>
+            <li><a href="/Dataset.py" target="_blank">Dataset.py</a></li>
+        </ul>
+
+        <div class="mb-4">
+            <button id="btn-generate-all" class="btn btn-success">Generate All</button>
+        </div>
+
+        <div class="row mb-2 align-items-center" id="row-gram">
+            <label class="col-sm-4 col-form-label">gram()</label>
+            <div class="col-sm-2">
+                <button class="btn btn-primary w-100">Generate</button>
+            </div>
+            <div class="col-sm-6">
+                <span class="output fw-bold"></span>
+            </div>
+        </div>
+        <div class="row mb-2 align-items-center" id="row-brand">
+            <label class="col-sm-4 col-form-label">brand()</label>
+            <div class="col-sm-2">
+                <button class="btn btn-primary w-100">Generate</button>
+            </div>
+            <div class="col-sm-6">
+                <span class="output fw-bold"></span>
+            </div>
+        </div>
+        <div class="row mb-2 align-items-center" id="row-product">
+            <label class="col-sm-4 col-form-label">product()</label>
+            <div class="col-sm-2">
+                <button class="btn btn-primary w-100">Generate</button>
+            </div>
+            <div class="col-sm-6">
+                <span class="output fw-bold"></span>
+            </div>
+        </div>
+        <div class="row mb-2 align-items-center" id="row-full_product">
+            <label class="col-sm-4 col-form-label">full_product()</label>
+            <div class="col-sm-2">
+                <button class="btn btn-primary w-100">Generate</button>
+            </div>
+            <div class="col-sm-6">
+                <span class="output fw-bold"></span>
+            </div>
+        </div>
+        <div class="row mb-2 align-items-center" id="row-company">
+            <label class="col-sm-4 col-form-label">company()</label>
+            <div class="col-sm-2">
+                <button class="btn btn-primary w-100">Generate</button>
+            </div>
+            <div class="col-sm-6">
+                <span class="output fw-bold"></span>
+            </div>
+        </div>
+        <div class="row mb-2 align-items-center" id="row-company_sector">
+            <label class="col-sm-4 col-form-label">company_sector()</label>
+            <div class="col-sm-2">
+                <button class="btn btn-primary w-100">Generate</button>
+            </div>
+            <div class="col-sm-6">
+                <span class="output fw-bold"></span>
+            </div>
+        </div>
+        <div class="row mb-2 align-items-center" id="row-company_subsector">
+            <label class="col-sm-4 col-form-label">company_subsector()</label>
+            <div class="col-sm-2">
+                <button class="btn btn-primary w-100">Generate</button>
+            </div>
+            <div class="col-sm-6">
+                <span class="output fw-bold"></span>
+            </div>
+        </div>
+        <div class="row mb-2 align-items-center" id="row-food">
+            <label class="col-sm-4 col-form-label">food()</label>
+            <div class="col-sm-2">
+                <button class="btn btn-primary w-100">Generate</button>
+            </div>
+            <div class="col-sm-6">
+                <span class="output fw-bold"></span>
+            </div>
+        </div>
+        <div class="row mb-2 align-items-center" id="row-full_company">
+            <label class="col-sm-4 col-form-label">full_company()</label>
+            <div class="col-sm-2">
+                <button class="btn btn-primary w-100">Generate</button>
+            </div>
+            <div class="col-sm-6">
+                <span class="output fw-bold"></span>
+            </div>
+        </div>
+        <div class="row mb-2 align-items-center" id="row-prefix">
+            <label class="col-sm-4 col-form-label">prefix()</label>
+            <div class="col-sm-2">
+                <button class="btn btn-primary w-100">Generate</button>
+            </div>
+            <div class="col-sm-6">
+                <span class="output fw-bold"></span>
+            </div>
+        </div>
+        <div class="row mb-2 align-items-center" id="row-suffix">
+            <label class="col-sm-4 col-form-label">suffix()</label>
+            <div class="col-sm-2">
+                <button class="btn btn-primary w-100">Generate</button>
+            </div>
+            <div class="col-sm-6">
+                <span class="output fw-bold"></span>
+            </div>
+        </div>
+        <div class="row mb-2 align-items-center" id="row-company_suffix_prefix">
+            <label class="col-sm-4 col-form-label">company_suffix_prefix()</label>
+            <div class="col-sm-2">
+                <button class="btn btn-primary w-100">Generate</button>
+            </div>
+            <div class="col-sm-6">
+                <span class="output fw-bold"></span>
+            </div>
+        </div>
+        <div class="row mb-2 align-items-center" id="row-company_suffix_prefix_from_name">
+            <label class="col-sm-4 col-form-label">company_suffix_prefix_from_name(name)</label>
+            <div class="col-sm-2">
+                <input type="text" class="form-control" placeholder="Company Name" />
+            </div>
+            <div class="col-sm-2">
+                <button class="btn btn-primary w-100">Generate</button>
+            </div>
+            <div class="col-sm-4">
+                <span class="output fw-bold"></span>
+            </div>
+        </div>
+        <div class="row mb-2 align-items-center" id="row-get_company_code">
+            <label class="col-sm-4 col-form-label">get_company_code(name)</label>
+            <div class="col-sm-2">
+                <input type="text" class="form-control" placeholder="Company Name" />
+            </div>
+            <div class="col-sm-2">
+                <button class="btn btn-primary w-100">Generate</button>
+            </div>
+            <div class="col-sm-4">
+                <span class="output fw-bold"></span>
+            </div>
+        </div>
+    </div>
+    <div class="container mt-4">
+        <p>Code sample</p>
+        <pre class="bg-light p-3 rounded border overflow-auto mb-3">
+            <code>
+// Jangan lupa import faker-js nya terlebih dahulu
+import { Dataset } from '/Dataset.js';
+const ds = new Dataset();
+ds.loadData().then(() => {
+    console.log(ds.gram());
+    console.log(ds.brand());
+    console.log(ds.product());
+    console.log(ds.full_product());
+    console.log(ds.company());
+    console.log(ds.company_sector());
+    console.log(ds.company_subsector());
+    console.log(ds.food());
+    console.log(ds.full_company());
+    console.log(ds.prefix());
+    console.log(ds.suffix());
+    console.log(ds.company_suffix_prefix());
+    console.log(ds.company_suffix_prefix_from_name('Company Name'));
+    console.log(ds.get_company_code('Company Name'));
+});
+            </code>
+        </pre>
+    </div>
+    <!-- Bootstrap JS (optional, for some components) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
